@@ -5,14 +5,10 @@ import billboard
 import datetime
 from datetime import date
 import pandas as pd
-
-chart = billboard.ChartData('hot-100')
-#print(chart.title)
-song = chart[0:2]
-#print(chart)
+import csv
 
 #creates a pandas data frame containing a range of dates:
-dates_df = pd.date_range(end = datetime.date(2023, 7, 29), periods = 400, freq = '1W').to_pydatetime().tolist()
+dates_df = pd.date_range(end = datetime.date(2023, 7, 29), periods = 10, freq = '1W').to_pydatetime().tolist()
 
 #initializes a dictionary for the songs:
 select_songs = dict()
@@ -27,11 +23,11 @@ for date_x in dates_df:
         #determines if the song has reached #1:
         if song.peakPos == 1:
             #determines if the song has been on the chart for 52 weeks:
-            if song.weeks >= 52:
+            if song.weeks >= 2:
                 #if the song is already in the dictionary:
                 if song.title in select_songs:
                     #if the number of weeks in this entry of the song is greater than the value currently stored:
-                    if select_songs[song.title]['weeks'] > song.weeks:
+                    if int(select_songs[song.title]['weeks']) > int(song.weeks):
                         #updates weeks value for the song:
                         select_songs[song.title]['weeks'] = song.weeks
                         print("updating weeks on chart for {}".format(song.title))
@@ -41,5 +37,8 @@ for date_x in dates_df:
                     select_songs[song.title] = {'weeks': song.weeks, 'artist': song.artist, 'peak position': song.peakPos}
                     print("adding {} to dictionary".format(song.title))
 #after all the songs for the date range are added, print the dictionary values:
-for song_key in select_songs:
-    print("Title: {}, Artist: {}, Weeks: {}".format(song_key, song_key['artist'], song_key['weeks']))
+with open('billboard_output.csv', mode='w') as csv_file:
+    csv_file = csv.writer(csv_file, delimiter=',', quotechar='"')
+    for song_key in select_songs:
+        print("Title: {}, \tArtist: {}, \tWeeks: {}".format(song_key, select_songs[song_key]['artist'], select_songs[song_key]['weeks']))
+        csv_file.writerow([song_key, select_songs[song_key]['artist'], select_songs[song_key]['weeks']])
